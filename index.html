@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>FaithLink — Static HTML Demo</title>
+<link rel="preconnect" href="https://images.unsplash.com">
+<style>
+  /* -------------------------
+     Basic Reset & Vars
+     ------------------------- */
+  :root{
+    --bg: #0b0b0b;
+    --card: rgba(255,255,255,0.06);
+    --muted: rgba(255,255,255,0.7);
+    --accent: linear-gradient(135deg,#fbbf24 0%,#fb7185 50%, #60a5fa 100%);
+    --glass: rgba(255,255,255,0.06);
+    --glass-2: rgba(255,255,255,0.04);
+    --radius: 18px;
+    --maxw: 1100px;
+    --shadow: 0 6px 24px rgba(2,6,23,0.6);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  *{box-sizing:border-box}
+  html,body,#app { height:100%; }
+  body{
+    margin:0;
+    background: radial-gradient(1200px 500px at 10% 10%, rgba(255,200,150,0.04), transparent),
+                radial-gradient(1000px 450px at 90% 90%, rgba(140,200,255,0.03), transparent),
+                var(--bg);
+    color:white;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    line-height:1.35;
+    padding:24px;
+    display:flex;
+    justify-content:center;
+  }
+
+  .container{
+    width:100%;
+    max-width:var(--maxw);
+  }
+
+  /* -------------------------
+     Topbar
+     ------------------------- */
+  header.topbar{
+    position:sticky; top:6px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.04);
+    padding:12px 16px; border-radius:14px;
+    display:flex; gap:12px; align-items:center;
+    margin-bottom:18px;
+    backdrop-filter: blur(6px);
+  }
+  .brand{ font-weight:700; display:flex; align-items:center; gap:10px; }
+  .brand .logo{ font-size:22px; background:linear-gradient(90deg,#fff 0%,#fff 100%); -webkit-background-clip:text; color:transparent; }
+  .search{
+    margin-left:auto; display:flex; gap:8px; align-items:center; min-width:280px;
+  }
+  input.search-in{
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.05);
+    padding:10px 12px; border-radius:12px; color:var(--muted); min-width:220px;
+  }
+  button.btn{
+    background:var(--glass);
+    border:1px solid rgba(255,255,255,0.06);
+    padding:8px 12px; border-radius:12px; color:var(--muted);
+    cursor:pointer;
+  }
+  button.btn.ghost{ background:transparent; border:1px solid rgba(255,255,255,0.06); }
+  button.btn.primary{
+    background:linear-gradient(90deg,#f97316,#ef4444); color:white; border:0;
+  }
+
+  /* -------------------------
+     Auth Gate (fullscreen modal)
+     ------------------------- */
+  .auth {
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    z-index:9999; background:linear-gradient(180deg, rgba(10,10,10,0.5), rgba(10,10,10,0.6));
+  }
+  .auth-card{
+    width:100%; max-width:520px; border-radius:22px; padding:22px; background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.06); box-shadow:var(--shadow);
+    animation: popup .36s ease;
+  }
+  @keyframes popup{ from{ transform:translateY(18px); opacity:0 } to{ transform:none; opacity:1 } }
+  .auth h2{ margin:6px 0 2px; font-size:20px; }
+  .auth p{ margin:0; opacity:0.8; font-size:13px; }
+
+  /* -------------------------
+     Main Hero Card
+     ------------------------- */
+  .hero{
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.02));
+    border-radius:20px; padding:20px; border:1px solid rgba(255,255,255,0.04); box-shadow: 0 8px 40px rgba(2,6,23,0.6);
+    display:flex; gap:18px; align-items:center;
+  }
+  .hero .text{flex:1}
+  .hero h1{ margin:0; font-size:26px; font-weight:800 }
+  .hero p{ margin:8px 0 0; opacity:0.78 }
+  .hero .motif{
+    width:120px; height:100px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:46px;
+    background:linear-gradient(135deg,#fef3c7,#fecaca,#bfdbfe); color:#0b1221; transform-origin:center;
+    animation: bob 6s infinite;
+  }
+  @keyframes bob{ 0%{ transform:rotate(0deg) } 25%{ transform:rotate(2deg) } 50%{ transform:rotate(0deg) } 75%{ transform:rotate(-2deg) } 100%{ transform:rotate(0deg) } }
+
+  /* -------------------------
+     Layout grid
+     ------------------------- */
+  .main-grid{ display:grid; grid-template-columns:270px 1fr; gap:18px; margin-top:18px; }
+  aside.card{
+    border-radius:16px; background:var(--card); padding:14px; border:1px solid rgba(255,255,255,0.04);
+  }
+  .content-card{
+    border-radius:16px; padding:14px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.04);
+  }
+
+  /* -------------------------
+     Tabs
+     ------------------------- */
+  .tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .tab{ padding:8px 12px; border-radius:12px; background:transparent; border:1px solid rgba(255,255,255,0.04); cursor:pointer; }
+  .tab.active{ background:rgba(255,255,255,0.06); box-shadow:0 6px 24px rgba(0,0,0,0.6); }
+
+  /* -------------------------
+     Festival cards grid
+     ------------------------- */
+  .grid{ display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+  .fest-card{ border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); transition: transform .18s ease, box-shadow .18s ease; }
+  .fest-card:hover{ transform:translateY(-6px); box-shadow: 0 12px 40px rgba(2,6,23,0.6); }
+  .fest-card img{ width:100%; height:140px; object-fit:cover; display:block; }
+  .fest-body{ padding:12px; }
+  .pill{ display:inline-block; padding:6px 10px; border-radius:999px; background:rgba(255,255,255,0.03); font-size:12px; margin:6px 6px 0 0; }
+
+  /* -------------------------
+     Buttons row
+     ------------------------- */
+  .btn-row{ display:flex; gap:8px; margin-top:10px; }
+
+  /* -------------------------
+     Festival sheet (slide-up)
+     ------------------------- */
+  .sheet-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:999; display:flex; align-items:flex-end; justify-content:center; }
+  .sheet{
+    width:100%; max-width:900px; background:linear-gradient(180deg,#fff 0%, #fff 14%); color:#111; border-radius:18px 18px 0 0; padding:18px; z-index:1000;
+    transform: translateY(6%); animation: sheetIn .36s cubic-bezier(.2,.9,.28,1);
+  }
+  @keyframes sheetIn{ from{ transform: translateY(100%) } to{ transform: translateY(0) } }
+  .sheet .close{ float:right; background:transparent; border:0; font-size:18px; cursor:pointer; }
+
+  /* -------------------------
+     Travel planner
+     ------------------------- */
+  .travel-grid{ display:grid; grid-template-columns:1fr 360px; gap:14px; align-items:start; }
+  .route-card{ border-radius:12px; padding:12px; border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); }
+  .route-header{ display:flex; gap:8px; align-items:center; padding:10px; border-bottom:1px solid rgba(255,255,255,0.03); }
+  .route-options{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
+  .route-slot{ padding:8px; border-radius:10px; border:1px solid rgba(255,255,255,0.03); background:rgba(255,255,255,0.02); }
+
+  /* -------------------------
+     Hotels list
+     ------------------------- */
+  .hotel{ display:flex; gap:10px; align-items:center; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.03); background:rgba(255,255,255,0.02); }
+
+  /* -------------------------
+     Tradition grid popover
+     ------------------------- */
+  .trad-pop{ position:absolute; left:18px; top:56px; z-index:80; background:rgba(255,255,255,0.98); color:#111; padding:12px; border-radius:12px; box-shadow:0 12px 40px rgba(0,0,0,0.6); display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+  .trad-button{ padding:10px; border-radius:10px; cursor:pointer; font-weight:600; display:flex; gap:8px; align-items:center; justify-content:center; border:1px solid rgba(0,0,0,0.06) }
+
+  /* -------------------------
+     Small screens
+     ------------------------- */
+  @media (max-width:980px){
+    .main-grid{ grid-template-columns:1fr; }
+    .travel-grid{ grid-template-columns:1fr; }
+    .hero{ flex-direction:column; }
+    .brand .logo{ display:inline-block; }
+    .trad-pop{ position:fixed; left:12px; right:12px; top:90px; grid-template-columns:repeat(3,1fr) }
+    .sheet{ max-width:100%; border-radius:16px 16px 0 0; }
+  }
+
+  /* -------------------------
+     Minor helpers
+     ------------------------- */
+  .muted{ opacity:0.78; font-size:13px; color:rgba(255,255,255,0.8); }
+  .small{ font-size:13px; opacity:0.8; }
+  .gap{ height:14px; }
+  .right{ margin-left:auto; }
+  .badge{ font-size:12px; padding:6px 8px; border-radius:8px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03) }
+
+  /* dark-mode for content inside sheet */
+  .sheet h3{ margin:0 0 4px 0; }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div style="display:flex;gap:12px;align-items:center;">
+      <button class="btn" id="menuBtn" title="Select tradition">☰</button>
+      <div class="brand"><div class="logo">🕊️ FaithLink</div><div class="small muted" id="greet">Hello, Guest</div></div>
+    </div>
+
+    <div class="search">
+      <input class="search-in" id="search" placeholder="Search videos, places, products…" />
+      <button class="btn">🔍 Search</button>
+      <button class="btn ghost" id="logoutBtn" title="Logout">⎋ Logout</button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="text">
+      <h1>A secular home for faith, festivals & pilgrimage</h1>
+      <p class="muted">Pick your tradition, learn authentic practices, shop essentials, and plan sacred journeys — all in one inclusive place.</p>
+      <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn primary" id="openTravel">🧭 Open Travel Planner</button>
+        <button class="btn ghost" id="openFestivals">📅 Upcoming Festivals</button>
+      </div>
+    </div>
+    <div class="motif" id="motif">🪔</div>
+  </section>
+
+  <div class="main-grid">
+    <!-- LEFT: quick card -->
+    <aside class="card">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:28px" id="leftMotif">🪔</div>
+        <div>
+          <div style="font-weight:700" id="tradName">Hinduism</div>
+          <div class="muted small">Respectful. Inclusive. No ranking across faiths.</div>
+        </div>
+      </div>
+      <div class="gap"></div>
+      <div style="display:flex;gap:8px;">
+        <div class="badge" id="tradBadge">Traditions</div>
+      </div>
+    </aside>
+
+    <!-- RIGHT: tabs & content -->
+    <section>
+      <div class="content-card">
+        <div class="tabs" id="tabs">
+          <button class="tab active" data-tab="festivals">📅 Festivals</button>
+          <button class="tab" data-tab="travel">🧭 Travel</button>
+          <button class="tab" data-tab="products">🛍️ Products</button>
+          <button class="tab" data-tab="scriptures">📚 Scriptures</button>
+          <button class="tab" data-tab="audio">🎧 Audio</button>
+          <button class="tab" data-tab="kids">🧒 Kids</button>
+        </div>
+
+        <!-- festivals view -->
+        <div id="festivalsView">
+          <div class="grid" id="festGrid"></div>
+        </div>
+
+        <!-- travel view -->
+        <div id="travelView" style="display:none">
+          <div class="travel-grid">
+            <div>
+              <div class="route-card">
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <div style="font-weight:700">🧭 Plan your pilgrimage</div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                  <div style="flex:1;min-width:160px">
+                    <label class="small muted">From</label><br/>
+                    <select id="originSel" style="width:100%;padding:8px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.04)">
+                    </select>
+                  </div>
+                  <div style="flex:1;min-width:160px">
+                    <label class="small muted">Destination</label><br/>
+                    <select id="destSel" style="width:100%;padding:8px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.04)">
+                    </select>
+                  </div>
+                  <div style="align-self:end">
+                    <button class="btn primary" id="checkAvail">🎟️ Check Availability</button>
+                  </div>
+                </div>
+              </div>
+
+              <div style="height:14px"></div>
+
+              <div id="routesList"></div>
+            </div>
+
+            <aside>
+              <div class="card" style="padding:0;overflow:hidden">
+                <img id="destImage" src="" alt="destination" style="width:100%;height:140px;object-fit:cover;display:block" />
+                <div style="padding:12px">
+                  <div style="display:flex;align-items:center;gap:8px;"><div style="font-weight:700" id="destTitle">Hotels near</div></div>
+                  <div style="margin-top:10px" id="hotelsList"></div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <!-- simple placeholders for other tabs -->
+        <div id="otherTab" style="display:none;margin-top:12px">
+          <div class="card">
+            <div style="padding:18px">Placeholder content — integrate APIs later.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer style="margin-top:18px;display:flex;justify-content:space-between;align-items:center;">
+    <div class="small muted">© <span id="year"></span> FaithLink • An inclusive space for every tradition.</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn ghost">About</button>
+      <button class="btn ghost">Contact</button>
+      <button class="btn">Become a Partner</button>
+    </div>
+  </footer>
+</div>
+
+<!-- Tradition popover (hidden) -->
+<div id="tradPop" style="display:none;">
+  <div class="trad-pop" id="tradGrid"></div>
+</div>
+
+<!-- Festival sheet -->
+<div id="sheetWrap" style="display:none;"></div>
+
+<!-- Auth gate -->
+<div class="auth" id="authGate">
+  <div class="auth-card" role="dialog" aria-modal="true">
+    <div style="text-align:center">
+      <div style="font-size:44px">🕊️</div>
+      <h2>Welcome to FaithLink</h2>
+      <p class="small muted">A secular space honoring every tradition.</p>
+    </div>
+    <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+      <button class="btn primary" id="googleBtn">✉️ Continue with Google (demo)</button>
+      <button class="btn" id="mobileBtn">📱 Continue with Mobile</button>
+
+      <div id="mobilePanel" style="display:none">
+        <input id="mobileInput" placeholder="Enter mobile number" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted)"/>
+        <button class="btn" id="sendOtp">Send OTP</button>
+      </div>
+
+      <div id="otpPanel" style="display:none">
+        <input id="otpInput" placeholder="Enter OTP (try 123456)" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted)"/>
+        <input id="nameInput" placeholder="Your name" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted)"/>
+        <button class="btn primary" id="verifyBtn">Verify & Enter</button>
+        <div class="small muted" style="text-align:center;margin-top:6px">Demo flow. OTP: <strong>123456</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================
+   Data ported from your React app
+   ========================= */
+const RELIGIONS = [
+  { key: "hinduism", name: "Hinduism", motif: "🪔", accent: "gold" },
+  { key: "islam", name: "Islam", motif: "🕋", accent: "teal" },
+  { key: "christianity", name: "Christianity", motif: "✝️", accent: "indigo" },
+  { key: "buddhism", name: "Buddhism", motif: "☸️", accent: "lime" },
+  { key: "sikh", name: "Sikh", motif: "🪯", accent: "amber" },
+  { key: "jewish", name: "Judaism", motif: "✡️", accent: "sky" },
+];
+
+const FESTIVALS = {
+  hinduism: [
+    {
+      name: "Ganesh Chaturthi",
+      date: "2025-09-03",
+      image: "https://images.unsplash.com/photo-1598899134739-24b3ba83a5d0?q=80&w=1200&auto=format&fit=crop",
+      items: ["Clay idol", "Modak", "Durva grass", "Dhoop/Incense", "Red cloth"],
+      places: ["Mumbai", "Pune"],
+      ritual: [
+        "Clean altar, spread red cloth, place Ganesh idol facing east.",
+        "Offer durva, flowers, sweets; recite Ganesh aarti.",
+        "Perform 21 modak offering; conclude with diya.",
+      ],
+    },
+    {
+      name: "Navratri",
+      date: "2025-10-01",
+      image: "https://images.unsplash.com/photo-1603190287605-e6ade32fa852?q=80&w=1200&auto=format&fit=crop",
+      items: ["Kalash", "Diyas", "Coconut", "Garba dress"],
+      places: ["Ahmedabad", "Vadodara", "Kolkata"],
+      ritual: [
+        "Establish kalash on day 1; invoke Goddess.",
+        "Daily aarti; offer prasad (fruits, sweets).",
+        "Participate in garba/dandiya in evening.",
+      ],
+    },
+  ],
+  islam: [
+    {
+      name: "Milad-un-Nabi",
+      date: "2025-09-06",
+      image: "https://images.unsplash.com/photo-1588332192275-87ca5f9d2c9b?q=80&w=1200&auto=format&fit=crop",
+      items: ["Attar", "Dates", "Prayer mat", "Covering scarf"],
+      places: ["Lucknow", "Hyderabad"],
+      ritual: [
+        "Offer salutations and send durood.",
+        "Gatherings of naat; charity and sweets distribution.",
+      ],
+    },
+    {
+      name: "Arbaeen",
+      date: "2025-08-28",
+      image: "https://images.unsplash.com/photo-1549641205-5f779315dd07?q=80&w=1200&auto=format&fit=crop",
+      items: ["Tasbeeh", "Hijab/Topi", "Water bottles"],
+      places: ["Karbala"],
+      ritual: [
+        "Processions/walks remembering Karbala.",
+        "Recite ziyarah; give water/food to travelers.",
+      ],
+    },
+  ],
+  christianity: [
+    {
+      name: "All Saints' Day",
+      date: "2025-11-01",
+      image: "https://images.unsplash.com/photo-1505852679233-d9fd70aff56d?q=80&w=1200&auto=format&fit=crop",
+      items: ["Candles", "Rosary", "Flowers"],
+      places: ["Vatican City", "Goa"],
+      ritual: [
+        "Attend mass; light candles at church.",
+        "Prayer for saints; family meal.",
+      ],
+    },
+  ],
+  buddhism: [
+    {
+      name: "Kathina",
+      date: "2025-10-18",
+      image: "https://images.unsplash.com/photo-1530021232320-687b1cc4f039?q=80&w=1200&auto=format&fit=crop",
+      items: ["Robe offering", "Lotus", "Fruits"],
+      places: ["Sarnath", "Bangkok"],
+      ritual: [
+        "Offer robes to Sangha after Vassa.",
+        "Dana (giving) and chanting; meditation.",
+      ],
+    },
+  ],
+  sikh: [
+    {
+      name: "Gurpurab (Guru Nanak)",
+      date: "2025-11-05",
+      image: "https://images.unsplash.com/photo-1601758124045-9d82f0f95a39?q=80&w=1200&auto=format&fit=crop",
+      items: ["Kara", "Rumala Sahib", "Kada prasad"],
+      places: ["Amritsar", "Nankana Sahib"],
+      ritual: [
+        "Akhand Path; Nagar Kirtan processions.",
+        "Seva in langar; ardas at Gurudwara.",
+      ],
+    },
+  ],
+  jewish: [
+    {
+      name: "Rosh Hashanah",
+      date: "2025-09-23",
+      image: "https://images.unsplash.com/photo-1561484930-998b6a7b3f6b?q=80&w=1200&auto=format&fit=crop",
+      items: ["Challah", "Apples & honey", "Pomegranate"],
+      places: ["Jerusalem", "New York"],
+      ritual: [
+        "Synagogue services; shofar blowing.",
+        "Festive meal with symbolic foods.",
+      ],
+    },
+  ],
+};
+
+const PLACES = [
+  { id: "vrindavan", religion: "hinduism", name: "Vrindavan", city: "Mathura", lat: 27.574, lon: 77.699, state: "UP", about: "Land of Krishna's childhood.", hotels: ["Nidhivan Sarovar Portico", "Hotel Basera"], image: "https://images.unsplash.com/photo-1606229365488-0a7a73e7f24d?q=80&w=1200&auto=format&fit=crop" },
+  { id: "kedarnath", religion: "hinduism", name: "Kedarnath", city: "Rudraprayag", lat: 30.735, lon: 79.067, state: "Uttarakhand", about: "One of the 12 Jyotirlinga.", hotels: ["GMVN", "Behl Ashram"], image: "https://images.unsplash.com/photo-1566576912320-0b56c0a12a17?q=80&w=1200&auto=format&fit=crop" },
+  { id: "ajmer", religion: "islam", name: "Ajmer Sharif Dargah", city: "Ajmer", lat: 26.4499, lon: 74.6399, state: "Rajasthan", hotels: ["Hotel Royal Ajmer", "The Royal Melange"], image: "https://images.unsplash.com/photo-1589308078057-918dc7aa0d2a?q=80&w=1200&auto=format&fit=crop" },
+  { id: "mecca", religion: "islam", name: "Masjid al-Haram (Makkah)", city: "Makkah", lat: 21.4225, lon: 39.8262, state: "SA", hotels: ["Fairmont Clock Tower", "Hilton Makkah"], image: "https://images.unsplash.com/photo-1541845152-9a1bf066205d?q=80&w=1200&auto=format&fit=crop" },
+  { id: "bodh", religion: "buddhism", name: "Bodh Gaya", city: "Gaya", lat: 24.695, lon: 84.991, state: "Bihar", hotels: ["Hotel Bodhgaya Regency", "Mahayana"], image: "https://images.unsplash.com/photo-1585314062340-7d6d7f2f0f99?q=80&w=1200&auto=format&fit=crop" },
+  { id: "amritsar", religion: "sikh", name: "Sri Harmandir Sahib", city: "Amritsar", lat: 31.62, lon: 74.876, state: "Punjab", hotels: ["Ramada Amritsar", "Fairfield Marriott"], image: "https://images.unsplash.com/photo-1578926288453-64ec6e8917e7?q=80&w=1200&auto=format&fit=crop" },
+  { id: "jerusalem", religion: "jewish", name: "Western Wall", city: "Jerusalem", lat: 31.7767, lon: 35.2345, state: "IL", hotels: ["Mamilla Hotel", "Hashimi"], image: "https://images.unsplash.com/photo-1544989164-31dc3c645987?q=80&w=1200&auto=format&fit=crop" },
+  { id: "goa", religion: "christianity", name: "Basilica of Bom Jesus", city: "Goa", lat: 15.5, lon: 73.911, state: "Goa", hotels: ["Vivanta Goa", "Taj Exotica"], image: "https://images.unsplash.com/photo-1608451643043-42c62b58b9f5?q=80&w=1200&auto=format&fit=crop" },
+];
+
+const ORIGINS = [
+  { key: "kolkata", name: "Kolkata", lat: 22.5726, lon: 88.3639 },
+  { key: "mumbai", name: "Mumbai", lat: 19.076, lon: 72.8777 },
+  { key: "delhi", name: "Delhi", lat: 28.6139, lon: 77.209 },
+  { key: "hyderabad", name: "Hyderabad", lat: 17.385, lon: 78.4867 },
+  { key: "bengaluru", name: "Bengaluru", lat: 12.9716, lon: 77.5946 },
+];
+
+/* =========================
+   Helpers
+   ========================= */
+function haversine(a, b) {
+  const R = 6371;
+  const toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLon = toRad(b.lon - a.lon);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+function buildRoutes(origin, dest) {
+  const distanceKm = Math.max(50, Math.round(haversine(origin, dest)));
+  const speeds = { flight: 700, train: 65, bus: 45 };
+  const price = { flight: Math.round(3.5 * distanceKm), train: Math.round(0.9 * distanceKm), bus: Math.round(0.7 * distanceKm) };
+  const duration = {
+    flight: (distanceKm / speeds.flight) * 60,
+    train: (distanceKm / speeds.train) * 60,
+    bus: (distanceKm / speeds.bus) * 60,
+  };
+  const slots = (seed) =>
+    Array.from({ length: 3 }, (_, i) => {
+      const depHr = 8 + i * 4;
+      const arrHr = depHr + Math.ceil(duration[seed] / 60);
+      return { dep: `${depHr}:00`, arr: `${Math.max(depHr+1, arrHr)}:00`, seats: Math.floor(10 + Math.random() * 40) };
+    });
+  return [
+    { mode: "Flight", key: "flight", price: price.flight, minutes: Math.round(duration.flight), options: slots("flight") },
+    { mode: "Train", key: "train", price: price.train, minutes: Math.round(duration.train), options: slots("train") },
+    { mode: "Bus", key: "bus", price: price.bus, minutes: Math.round(duration.bus), options: slots("bus") },
+  ].sort((a,b)=>a.minutes-b.minutes);
+}
+
+/* =========================
+   App state & UI wiring
+   ========================= */
+let currentUser = null;
+let activeReligion = RELIGIONS[0];
+
+const authGate = document.getElementById('authGate');
+const greet = document.getElementById('greet');
+const motifEl = document.getElementById('motif');
+const leftMotif = document.getElementById('leftMotif');
+const tradName = document.getElementById('tradName');
+const tradBadge = document.getElementById('tradBadge');
+const yearEl = document.getElementById('year');
+
+yearEl.textContent = new Date().getFullYear();
+
+/* Auth flow */
+document.getElementById('googleBtn').addEventListener('click', ()=>{
+  currentUser = { method:'google', name: 'Guest' };
+  enterApp();
+});
+document.getElementById('mobileBtn').addEventListener('click', ()=>{
+  document.getElementById('mobilePanel').style.display='block';
+});
+document.getElementById('sendOtp').addEventListener('click', ()=>{
+  document.getElementById('mobilePanel').style.display='none';
+  document.getElementById('otpPanel').style.display='block';
+});
+document.getElementById('verifyBtn').addEventListener('click', ()=>{
+  const otp = document.getElementById('otpInput').value.trim();
+  const name = document.getElementById('nameInput').value.trim() || 'Friend';
+  if(otp === '123456'){ currentUser = { method:'mobile', name }; enterApp(); } else { alert('Wrong OTP. Try 123456'); }
+});
+
+function enterApp(){
+  authGate.style.display = 'none';
+  greet.textContent = 'Hello, ' + (currentUser?.name || 'Friend');
+  // populate traditions and festivals now
+  renderTraditions();
+  renderFestivals();
+  populateOrigins();
+}
+
+/* Tradition popover */
+const tradPopWrap = document.getElementById('tradPop');
+const tradGrid = document.getElementById('tradGrid');
+const menuBtn = document.getElementById('menuBtn');
+menuBtn.addEventListener('click', toggleTradPop);
+
+function toggleTradPop(){
+  if(tradPopWrap.style.display === 'none' || tradPopWrap.style.display === '') {
+    renderTraditions();
+    tradPopWrap.style.display = 'block';
+    // append to body for absolute positioning
+    if(!tradPopWrap.parentElement) document.body.appendChild(tradPopWrap);
+  } else { tradPopWrap.style.display='none'; }
+}
+
+function renderTraditions(){
+  tradGrid.innerHTML = '';
+  RELIGIONS.forEach(r=>{
+    const btn = document.createElement('button');
+    btn.className = 'trad-button';
+    btn.innerHTML = `<span style="font-size:18px">${r.motif}</span><span>${r.name}</span>`;
+    btn.onclick = ()=>{ selectTradition(r); tradPopWrap.style.display='none'; };
+    tradGrid.appendChild(btn);
+  });
+}
+
+/* select tradition */
+function selectTradition(r){
+  activeReligion = r;
+  motifEl.textContent = r.motif;
+  leftMotif.textContent = r.motif;
+  tradName.textContent = r.name;
+  tradBadge.textContent = r.name;
+  // dark-mode effect: change accent color for motif background
+  // We'll just change motif background via inline style for visual cue
+  motifEl.parentElement.style = "";
+  renderFestivals();
+  populateDestinations();
+}
+
+/* Festivals UI */
+const festGrid = document.getElementById('festGrid');
+function renderFestivals(){
+  const list = FESTIVALS[activeReligion.key] || [];
+  festGrid.innerHTML = '';
+  if(!list.length){
+    festGrid.innerHTML = '<div class="muted">No upcoming festivals in demo data.</div>';
+    return;
+  }
+  list.sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach((f,idx)=>{
+    const card = document.createElement('div'); card.className='fest-card';
+    card.innerHTML = `
+      <img src="${f.image}" alt="${escapeHtml(f.name)}">
+      <div class="fest-body">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-weight:700">${escapeHtml(f.name)}</div>
+          <div class="small muted">${new Date(f.date).toDateString()}</div>
+        </div>
+        <div style="margin-top:8px">
+          ${f.items.slice(0,4).map(i=>`<span class="pill">${escapeHtml(i)}</span>`).join('')}
+        </div>
+        <div class="btn-row">
+          <button class="btn" data-action="details" data-name="${escapeHtml(f.name)}">🛍️ What to do</button>
+          <button class="btn ghost" data-action="plan" data-name="${escapeHtml(f.name)}">🎫 Plan travel</button>
+        </div>
+      </div>
+    `;
+    // wire buttons
+    card.querySelectorAll('button').forEach(b=>{
+      b.addEventListener('click',(e)=>{
+        const action=b.getAttribute('data-action');
+        if(action==='details'){ openFestivalSheet(f); }
+        else if(action==='plan'){ openTravelAndSelectPlace(f.places?.[0]); }
+      });
+    });
+    festGrid.appendChild(card);
+  });
+}
+
+/* Festival slide-up sheet */
+const sheetWrap = document.getElementById('sheetWrap');
+function openFestivalSheet(f){
+  sheetWrap.innerHTML = `
+    <div class="sheet-backdrop" id="sheetBackdrop">
+      <div class="sheet">
+        <div style="display:flex;align-items:start;gap:12px;">
+          <img src="${f.image}" alt="${escapeHtml(f.name)}" style="height:88px;width:128px;object-fit:cover;border-radius:12px;border:1px solid rgba(0,0,0,0.06)">
+          <div style="flex:1">
+            <div style="display:flex;gap:8px;align-items:center">
+              <h3>${escapeHtml(f.name)}</h3>
+              <div style="margin-left:auto"><button class="btn" id="closeSheet">✖️</button></div>
+            </div>
+            <div class="small muted">${new Date(f.date).toDateString()}</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="background:transparent;padding:10px;border-radius:10px">
+            <div style="font-weight:700;margin-bottom:6px">Items you'll need</div>
+            <ul style="margin:0;padding-left:18px">
+              ${f.items.map(i=>`<li>${escapeHtml(i)}</li>`).join('')}
+            </ul>
+          </div>
+          <div style="background:transparent;padding:10px;border-radius:10px">
+            <div style="font-weight:700;margin-bottom:6px">What to do</div>
+            <ol style="margin:0;padding-left:18px">
+              ${f.ritual.map(s=>`<li>${escapeHtml(s)}</li>`).join('')}
+            </ol>
+          </div>
+        </div>
+
+        <div style="margin-top:10px" class="small muted">Tip: Connect product kits and travel APIs here.</div>
+      </div>
+    </div>
+  `;
+  sheetWrap.style.display='block';
+  document.getElementById('sheetBackdrop').addEventListener('click', closeSheet);
+  document.getElementById('closeSheet').addEventListener('click', closeSheet);
+}
+function closeSheet(){
+  sheetWrap.style.display='none';
+  sheetWrap.innerHTML='';
+}
+
+/* Travel planner wiring */
+const originSel = document.getElementById('originSel');
+const destSel = document.getElementById('destSel');
+const destImage = document.getElementById('destImage');
+const destTitle = document.getElementById('destTitle');
+const hotelsList = document.getElementById('hotelsList');
+const routesList = document.getElementById('routesList');
+
+function populateOrigins(){
+  originSel.innerHTML = '';
+  ORIGINS.forEach(o=>{
+    const op = document.createElement('option'); op.value=o.key; op.textContent=o.name; originSel.appendChild(op);
+  });
+}
+function populateDestinations(){
+  destSel.innerHTML = '';
+  const filtered = PLACES.filter(p=>p.religion===activeReligion.key);
+  // pick first valid or fallback to first overall
+  const list = filtered.length?filtered:PLACES;
+  list.forEach(p=>{
+    const o=document.createElement('option'); o.value=p.id; o.textContent = `${p.name} • ${p.city}`; destSel.appendChild(o);
+  });
+  // set image/title
+  const sel = list[0];
+  destImage.src = sel.image;
+  destTitle.textContent = `Hotels near ${sel.name}`;
+  renderHotels(sel);
+  updateRoutes(); // compute for defaults
+}
+function renderHotels(place){
+  hotelsList.innerHTML = '';
+  (place.hotels || []).forEach(h=>{
+    const div = document.createElement('div'); div.className='hotel';
+    div.innerHTML = `<div style="height:42px;width:42px;border-radius:8px;background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:center">🏨</div>
+      <div style="flex:1"><div style="font-weight:700">${escapeHtml(h)}</div><div class="small muted">0.5–2.0 km • Free cancellation</div></div>
+      <div><button class="btn">See rooms</button></div>`;
+    hotelsList.appendChild(div);
+  });
+  if(!(place.hotels||[]).length) hotelsList.innerHTML = '<div class="muted small">No demo hotels</div>';
+}
+
+/* populate & update routes */
+function updateRoutes(){
+  const originKey = originSel.value || ORIGINS[0].key;
+  const origin = ORIGINS.find(o=>o.key===originKey);
+  const destId = destSel.value || PLACES[0].id;
+  const destination = PLACES.find(p=>p.id===destId);
+  if(!origin || !destination) return;
+  const routes = buildRoutes(origin, destination);
+  renderRoutes(routes, origin, destination);
+}
+
+function renderRoutes(routes, origin, destination){
+  routesList.innerHTML = '';
+  routes.forEach(r=>{
+    const div = document.createElement('div');
+    div.className='route-card';
+    div.innerHTML = `
+      <div class="route-header">
+        <div style="font-weight:700">${r.mode}</div>
+        <div style="margin-left:auto" class="small muted">~ ${Math.round(r.minutes/60)}h ${r.minutes%60}m</div>
+        <div style="margin-left:8px;font-weight:700">₹${r.price}</div>
+      </div>
+      <div style="padding:10px">
+        <div class="route-options">
+          ${r.options.map(o=>`<div class="route-slot"><div>Dep ${o.dep} → Arr ${o.arr}</div><div class="small muted">Seats: ${o.seats}</div><div style="margin-top:8px"><button class="btn" data-mode="${r.mode}" data-dep="${o.dep}">Book</button></div></div>`).join('')}
+        </div>
+      </div>
+    `;
+    // add click handlers to book buttons
+    div.querySelectorAll('button[data-mode]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        alert(`Booked ${b.getAttribute('data-mode')} at ${b.getAttribute('data-dep')} — demo only`);
+      });
+    });
+    routesList.appendChild(div);
+  });
+}
+
+/* open travel from festival button */
+function openTravelAndSelectPlace(placeName){
+  // switch to travel tab
+  switchToTab('travel');
+  // try to find a place with that city or name
+  const match = PLACES.find(p => p.city?.toLowerCase().includes(placeName?.toLowerCase()) || p.name?.toLowerCase().includes(placeName?.toLowerCase()));
+  if(match){
+    destSel.value = match.id;
+    destImage.src = match.image;
+    destTitle.textContent = `Hotels near ${match.name}`;
+    renderHotels(match);
+    updateRoutes();
+  }
+}
+
+/* events */
+document.getElementById('openTravel').addEventListener('click', ()=>switchToTab('travel'));
+document.getElementById('openFestivals').addEventListener('click', ()=>switchToTab('festivals'));
+document.getElementById('checkAvail').addEventListener('click', updateRoutes);
+originSel.addEventListener('change', updateRoutes);
+destSel.addEventListener('change', ()=>{
+  const sel = PLACES.find(p=>p.id===destSel.value);
+  if(sel){ destImage.src=sel.image; destTitle.textContent=`Hotels near ${sel.name}`; renderHotels(sel); updateRoutes(); }
+});
+
+/* tabs */
+function switchToTab(key){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.getAttribute('data-tab')===key));
+  document.getElementById('festivalsView').style.display = key==='festivals' ? '' : 'none';
+  document.getElementById('travelView').style.display = key==='travel' ? '' : 'none';
+  document.getElementById('otherTab').style.display = (['products','scriptures','audio','kids'].includes(key)) ? '' : 'none';
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click', ()=>switchToTab(t.getAttribute('data-tab'))));
+
+/* logout */
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  location.reload();
+});
+
+/* small utility */
+function escapeHtml(s){ return s.replaceAll && s.replaceAll('<','&lt;').replaceAll('>','&gt;') || s; }
+
+/* initial bootstrap */
+(function init(){
+  yearEl.textContent = new Date().getFullYear();
+  // show auth gate
+  authGate.style.display='flex';
+  // prepare origin/dest selects (they will be filled on auth)
+  populateOrigins();
+  populateDestinations();
+  // wire menu click outside to close
+  document.addEventListener('click', (e)=>{
+    if(!menuBtn.contains(e.target) && !tradPopWrap.contains(e.target)) tradPopWrap.style.display='none';
+  });
+  // dismiss sheet on Esc
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ closeSheet(); tradPopWrap.style.display='none'; }});
+})();
+</script>
+</body>
+</html>
